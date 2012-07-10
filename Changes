@@ -1,0 +1,41 @@
+Revision history for Log-Any-For-Class
+
+0.05     2012-07-10 (SHARYANTO)
+
+         [INCOMPATIBLE CHANGES]
+
+         - logger receives hashref arguments instead of hash, so it can modify
+           them.
+
+         [ENHANCEMENTS]
+
+         - Handle wantarray undef.
+
+
+0.04     2012-07-10 (SHARYANTO)
+
+         [ENHANCEMENTS]
+
+         - Add Log::Any::For::Package
+
+         - Add argument: 'filter_subs' ('filter_methods' for
+           Log::Any::For::Class).
+
+
+0.03     2012-07-10 (SHARYANTO)
+
+         [BUG FIXES]
+
+         - Don't try to load module if package already exists.
+
+         - Don't log $self in arguments.
+
+
+0.02     2012-07-10 (SHARYANTO)
+
+         No functional changes. Add missing dep to Log::Any.
+
+
+0.01     2012-07-10 (SHARYANTO)
+
+         First release.

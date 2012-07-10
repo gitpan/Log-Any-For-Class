@@ -1,0 +1,90 @@
+NAME
+    Log::Any::For::Class - Add logging to class
+
+VERSION
+    version 0.05
+
+SYNOPSIS
+     use Log::Any::For::Class qw(add_logging_to_class);
+     add_logging_to_class(classes => [qw/My::Class My::SubClass/]);
+     # now method calls to your classes are logged, by default at level 'trace'
+
+CREDITS
+    Some code portion taken from Devel::TraceMethods.
+
+SEE ALSO
+    Log::Any::For::Package
+
+    Log::Any::For::DBI, an application of this module.
+
+DESCRIPTION
+    This module has Rinci metadata.
+
+FUNCTIONS
+    None are exported by default, but they are exportable.
+
+  add_logging_to_class(%args) -> [status, msg, result, meta]
+    Add logging to class.
+
+    Logging will be done using Log::Any.
+
+    Currently this function adds logging around method calls, e.g.:
+
+        -> Class::method(...)
+        <- Class::method() = RESULT
+        ...
+
+    Arguments ('*' denotes required arguments):
+
+    *   classes* => *array*
+
+        Classes to add logging to.
+
+    *   filter_methods* => *array*
+
+        Filter methods to add logging to.
+
+        The default is to add logging to all non-private methods. Private
+        methods are those prefixed by "_".
+
+    *   postcall_logger* => *code*
+
+        Supply custom postcall logger.
+
+        Just like precall*logger, but code will be called after method is
+        call. Code will be given a hash argument %args containing these
+        keys: "args" (arrayref, the original @*), "orig" (coderef, the
+        original method), "name" (string, the fully-qualified method name),
+        "result" (arrayref, the method result).
+
+        You can use this mechanism to customize logging.
+
+    *   precall_logger* => *code*
+
+        Supply custom precall logger.
+
+        Code will be called when logging method call. Code will be given a
+        hash argument %args containing these keys: "args" (arrayref, the
+        original @_), "orig" (coderef, the original method), "name" (string,
+        the fully-qualified method name).
+
+        You can use this mechanism to customize logging.
+
+    Return value:
+
+    Returns an enveloped result (an array). First element (status) is an
+    integer containing HTTP status code (200 means OK, 4xx caller error, 5xx
+    function error). Second element (msg) is a string containing error
+    message, or 'OK' if status is 200. Third element (result) is optional,
+    the actual result. Fourth element (meta) is called result metadata and
+    is optional, a hash that contains extra information.
+
+AUTHOR
+    Steven Haryanto <stevenharyanto@gmail.com>
+
+COPYRIGHT AND LICENSE
+    This software is copyright (c) 2012 by Steven Haryanto.
+
+    This is free software; you can redistribute it and/or modify it under
+    the same terms as the Perl 5 programming language system itself.
+
