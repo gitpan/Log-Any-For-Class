@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.05'; # VERSION
+our $VERSION = '0.06'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -64,7 +64,7 @@ $spec->{args}{classes} = {
 delete $spec->{args}{filter_subs};
 $spec->{args}{filter_methods} = {
     summary => 'Filter methods to add logging to',
-    schema => ['array*' => {of=>'str*'}],
+    schema => 'regex*',
     description => <<'_',
 
 The default is to add logging to all non-private methods. Private methods are
@@ -106,7 +106,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.05
+version 0.06
 
 =head1 SYNOPSIS
 
@@ -134,7 +134,7 @@ This module has L<Rinci> metadata.
 
 None are exported by default, but they are exportable.
 
-=head2 add_logging_to_class(%args) -> [status, msg, result, meta]
+=head2 add_logging_to_class(%args) -> any
 
 Add logging to class.
 
@@ -154,14 +154,14 @@ Arguments ('*' denotes required arguments):
 
 Classes to add logging to.
 
-=item * B<filter_methods>* => I<array>
+=item * B<filter_methods> => I<regex>
 
 Filter methods to add logging to.
 
 The default is to add logging to all non-private methods. Private methods are
 those prefixed by C<_>.
 
-=item * B<postcall_logger>* => I<code>
+=item * B<postcall_logger> => I<code>
 
 Supply custom postcall logger.
 
@@ -172,7 +172,7 @@ fully-qualified method name), C<result> (arrayref, the method result).
 
 You can use this mechanism to customize logging.
 
-=item * B<precall_logger>* => I<code>
+=item * B<precall_logger> => I<code>
 
 Supply custom precall logger.
 
@@ -186,8 +186,6 @@ You can use this mechanism to customize logging.
 =back
 
 Return value:
-
-Returns an enveloped result (an array). First element (status) is an integer containing HTTP status code (200 means OK, 4xx caller error, 5xx function error). Second element (msg) is a string containing error message, or 'OK' if status is 200. Third element (result) is optional, the actual result. Fourth element (meta) is called result metadata and is optional, a hash that contains extra information.
 
 =head1 AUTHOR
 

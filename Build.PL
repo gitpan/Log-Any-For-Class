@@ -18,7 +18,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Log-Any-For-Class",
-  "dist_version" => "0.05",
+  "dist_version" => "0.06",
   "license" => "perl",
   "module_name" => "Log::Any::For::Class",
   "recommends" => {},
@@ -26,7 +26,9 @@ my %module_build_args = (
   "requires" => {
     "Data::Clone" => 0,
     "Log::Any" => 0,
+    "Module::Patch" => "0.07",
     "Rinci" => "1.1.0",
+    "SHARYANTO::Package::Util" => 0,
     "perl" => "5.010000"
   },
   "script_files" => []

@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.05
+    version 0.06
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -23,7 +23,7 @@ DESCRIPTION
 FUNCTIONS
     None are exported by default, but they are exportable.
 
-  add_logging_to_class(%args) -> [status, msg, result, meta]
+  add_logging_to_class(%args) -> any
     Add logging to class.
 
     Logging will be done using Log::Any.
@@ -40,14 +40,14 @@ FUNCTIONS
 
         Classes to add logging to.
 
-    *   filter_methods* => *array*
+    *   filter_methods => *regex*
 
         Filter methods to add logging to.
 
         The default is to add logging to all non-private methods. Private
         methods are those prefixed by "_".
 
-    *   postcall_logger* => *code*
+    *   postcall_logger => *code*
 
         Supply custom postcall logger.
 
@@ -59,7 +59,7 @@ FUNCTIONS
 
         You can use this mechanism to customize logging.
 
-    *   precall_logger* => *code*
+    *   precall_logger => *code*
 
         Supply custom precall logger.
 
@@ -71,13 +71,6 @@ FUNCTIONS
         You can use this mechanism to customize logging.
 
     Return value:
-
-    Returns an enveloped result (an array). First element (status) is an
-    integer containing HTTP status code (200 means OK, 4xx caller error, 5xx
-    function error). Second element (msg) is a string containing error
-    message, or 'OK' if status is 200. Third element (result) is optional,
-    the actual result. Fourth element (meta) is called result metadata and
-    is optional, a hash that contains extra information.
 
 AUTHOR
     Steven Haryanto <stevenharyanto@gmail.com>
