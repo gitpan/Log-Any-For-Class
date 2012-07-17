@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.06'; # VERSION
+our $VERSION = '0.07'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -64,7 +64,7 @@ $spec->{args}{classes} = {
 delete $spec->{args}{filter_subs};
 $spec->{args}{filter_methods} = {
     summary => 'Filter methods to add logging to',
-    schema => 'regex*',
+    schema => ['array*' => {of=>'str*'}],
     description => <<'_',
 
 The default is to add logging to all non-private methods. Private methods are
@@ -106,7 +106,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.06
+version 0.07
 
 =head1 SYNOPSIS
 
@@ -154,7 +154,7 @@ Arguments ('*' denotes required arguments):
 
 Classes to add logging to.
 
-=item * B<filter_methods> => I<regex>
+=item * B<filter_methods> => I<array>
 
 Filter methods to add logging to.
 

@@ -17,11 +17,9 @@ name: Log-Any-For-Class
 requires:
   Data::Clone: 0
   Log::Any: 0
-  Module::Patch: 0.07
   Rinci: 1.1.0
-  SHARYANTO::Package::Util: 0
   perl: 5.010000
 resources:
   homepage: http://metacpan.org/release/Log-Any-For-Class
   repository: http://github.com/sharyanto/perl-Log-Any-For-Class
-version: 0.06
+version: 0.07

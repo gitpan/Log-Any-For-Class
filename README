@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.06
+    version 0.07
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -40,7 +40,7 @@ FUNCTIONS
 
         Classes to add logging to.
 
-    *   filter_methods => *regex*
+    *   filter_methods => *array*
 
         Filter methods to add logging to.
 
