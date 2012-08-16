@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.07
+    version 0.08
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -40,6 +40,21 @@ FUNCTIONS
 
         Classes to add logging to.
 
+    *   filter_args => *code*
+
+        Filter for @_.
+
+        Filter arguments to log. The default is to log @* as is. Code will
+        be given a hashref argument \%args containing these keys: "args"
+        (arrayref, a shallow copy of the original @*). Code is expected to
+        filter out unwanted stuffs in "args".
+
+        This is usually used to filter out long object or data, e.g. replace
+        it with "(object)", "...", or whatever.
+
+        If unspecified, the default filter is used. The default filter does
+        replace objects with '( object)'.
+
     *   filter_methods => *array*
 
         Filter methods to add logging to.
@@ -52,10 +67,10 @@ FUNCTIONS
         Supply custom postcall logger.
 
         Just like precall*logger, but code will be called after method is
-        call. Code will be given a hash argument %args containing these
-        keys: "args" (arrayref, the original @*), "orig" (coderef, the
-        original method), "name" (string, the fully-qualified method name),
-        "result" (arrayref, the method result).
+        call. Code will be given a hashref argument \%args containing these
+        keys: "args" (arrayref, a shallow copy of the original @*), "orig"
+        (coderef, the original method), "name" (string, the fully-qualified
+        method name), "result" (arrayref, the method result).
 
         You can use this mechanism to customize logging.
 
@@ -64,9 +79,9 @@ FUNCTIONS
         Supply custom precall logger.
 
         Code will be called when logging method call. Code will be given a
-        hash argument %args containing these keys: "args" (arrayref, the
-        original @_), "orig" (coderef, the original method), "name" (string,
-        the fully-qualified method name).
+        hashref argument \%args containing these keys: "args" (arrayref, a
+        shallow copy of the original @_), "orig" (coderef, the original
+        method), "name" (string, the fully-qualified method name).
 
         You can use this mechanism to customize logging.
 

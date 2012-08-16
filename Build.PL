@@ -7,8 +7,7 @@ use Module::Build 0.3601;
 
 my %module_build_args = (
   "build_requires" => {
-    "Module::Build" => "0.3601",
-    "Test::More" => "0.96"
+    "Module::Build" => "0.3601"
   },
   "configure_requires" => {
     "Module::Build" => "0.3601"
@@ -18,7 +17,7 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Log-Any-For-Class",
-  "dist_version" => "0.07",
+  "dist_version" => "0.08",
   "license" => "perl",
   "module_name" => "Log::Any::For::Class",
   "recommends" => {},
@@ -26,7 +25,8 @@ my %module_build_args = (
   "requires" => {
     "Data::Clone" => 0,
     "Log::Any" => 0,
-    "Rinci" => "1.1.0",
+    "Rinci" => "v1.1.0",
+    "Sub::Uplevel" => 0,
     "perl" => "5.010000"
   },
   "script_files" => []
