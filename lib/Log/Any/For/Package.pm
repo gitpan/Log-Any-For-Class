@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.10'; # VERSION
+our $VERSION = '0.11'; # VERSION
 
 use Data::Clean::JSON;
 use Data::Clone;
@@ -44,12 +44,14 @@ sub _default_precall_logger {
         my $indent = " " x ($nest_level * ($args->{logger_args}{indent} //
                                              $default_indent));
         $log->tracef("%s---> %s(%s)", $indent, $args->{name}, $cargs);
-        $nest_level++;
     }
+    $nest_level++;
 }
 
 sub _default_postcall_logger {
     my $args = shift;
+
+    $nest_level--;
     if ($log->is_trace) {
         my $largs  = $args->{logger_args} // {};
         my $indent = " " x ($nest_level * ($args->{logger_args}{indent} //
@@ -60,7 +62,6 @@ sub _default_postcall_logger {
         } else {
             $log->tracef("%s<--- %s()", $indent, $args->{name});
         }
-        $nest_level--;
     }
 }
 
@@ -253,7 +254,7 @@ Log::Any::For::Package - Add logging to package
 
 =head1 VERSION
 
-version 0.10
+version 0.11
 
 =head1 SYNOPSIS
 
