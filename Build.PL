@@ -17,12 +17,13 @@ my %module_build_args = (
     "Steven Haryanto <stevenharyanto\@gmail.com>"
   ],
   "dist_name" => "Log-Any-For-Class",
-  "dist_version" => "0.08",
+  "dist_version" => "0.09",
   "license" => "perl",
   "module_name" => "Log::Any::For::Class",
   "recommends" => {},
   "recursive_test_files" => 1,
   "requires" => {
+    "Data::Clean::JSON" => 0,
     "Data::Clone" => 0,
     "Log::Any" => 0,
     "Rinci" => "v1.1.0",

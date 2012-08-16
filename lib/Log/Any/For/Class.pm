@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.08'; # VERSION
+our $VERSION = '0.09'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -106,7 +106,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.08
+version 0.09
 
 =head1 SYNOPSIS
 
@@ -154,20 +154,6 @@ Arguments ('*' denotes required arguments):
 
 Classes to add logging to.
 
-=item * B<filter_args> => I<code>
-
-Filter for @_.
-
-Filter arguments to log. The default is to log @I< as is. Code will be given a
-hashref argument \%args containing these keys: C<args> (arrayref, a shallow copy
-of the original @>). Code is expected to filter out unwanted stuffs in C<args>.
-
-This is usually used to filter out long object or data, e.g. replace it with
-C<(object)>, C<...>, or whatever.
-
-If unspecified, the default filter is used. The default filter does replace
-objects with '( object)'.
-
 =item * B<filter_methods> => I<array>
 
 Filter methods to add logging to.
@@ -181,9 +167,8 @@ Supply custom postcall logger.
 
 Just like precallI<logger, but code will be called after method is call. Code
 will be given a hashref argument \%args containing these keys: C<args> (arrayref,
-a shallow copy of the original @>), C<orig> (coderef, the original method),
-C<name> (string, the fully-qualified method name), C<result> (arrayref, the method
-result).
+the original @>), C<orig> (coderef, the original method), C<name> (string, the
+fully-qualified method name), C<result> (arrayref, the method result).
 
 You can use this mechanism to customize logging.
 
@@ -192,9 +177,9 @@ You can use this mechanism to customize logging.
 Supply custom precall logger.
 
 Code will be called when logging method call. Code will be given a hashref
-argument \%args containing these keys: C<args> (arrayref, a shallow copy of the
-original @_), C<orig> (coderef, the original method), C<name> (string, the
-fully-qualified method name).
+argument \%args containing these keys: C<args> (arrayref, the original @_),
+C<orig> (coderef, the original method), C<name> (string, the fully-qualified
+method name).
 
 You can use this mechanism to customize logging.
 

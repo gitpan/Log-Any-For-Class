@@ -26,6 +26,7 @@
       },
       "runtime" : {
          "requires" : {
+            "Data::Clean::JSON" : 0,
             "Data::Clone" : 0,
             "Log::Any" : 0,
             "Rinci" : "v1.1.0",
@@ -41,6 +42,6 @@
          "url" : "http://github.com/sharyanto/perl-Log-Any-For-Class"
       }
    },
-   "version" : "0.08"
+   "version" : "0.09"
 }
 
