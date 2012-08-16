@@ -5,12 +5,10 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.13'; # VERSION
+our $VERSION = '0.14'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
-# doesn't currently work, Log::Log4perl not fooled
-#use Sub::Uplevel;
 
 our %SPEC;
 require Exporter;
@@ -22,23 +20,16 @@ sub _default_precall_logger {
     my $args  = shift;
     my $margs = $args->{args};
 
-    #uplevel 2, $args->{orig}, @$margs;
-
     # exclude $self or package
     $margs->[0] = '$self' if blessed($margs->[0]);
 
-    $log->tracef("---> %s(%s)", $args->{name}, $margs);
+    Log::Any::For::Package::_default_precall_logger($args);
 }
 
 sub _default_postcall_logger {
     my $args = shift;
-    #uplevel 2, $args->{orig}, @{$args->{args}};
 
-    if (@{$args->{result}}) {
-        $log->tracef("<--- %s() = %s", $args->{name}, $args->{result});
-    } else {
-        $log->tracef("<--- %s()", $args->{name});
-    }
+    Log::Any::For::Package::_default_postcall_logger($args);
 }
 
 my $spec = clone $Log::Any::For::Package::SPEC{add_logging_to_package};
@@ -106,7 +97,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.13
+version 0.14
 
 =head1 SYNOPSIS
 
