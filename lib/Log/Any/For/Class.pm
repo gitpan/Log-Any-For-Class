@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.09'; # VERSION
+our $VERSION = '0.10'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -106,7 +106,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.09
+version 0.10
 
 =head1 SYNOPSIS
 
@@ -161,6 +161,12 @@ Filter methods to add logging to.
 The default is to add logging to all non-private methods. Private methods are
 those prefixed by C<_>.
 
+=item * B<logger_args> => I<any>
+
+Pass arguments to logger.
+
+This allows passing arguments to logger routine (see C<logger_args>).
+
 =item * B<postcall_logger> => I<code>
 
 Supply custom postcall logger.
@@ -168,7 +174,8 @@ Supply custom postcall logger.
 Just like precallI<logger, but code will be called after method is call. Code
 will be given a hashref argument \%args containing these keys: C<args> (arrayref,
 the original @>), C<orig> (coderef, the original method), C<name> (string, the
-fully-qualified method name), C<result> (arrayref, the method result).
+fully-qualified method name), C<result> (arrayref, the method result),
+C<logger_args> (arguments given when adding logging).
 
 You can use this mechanism to customize logging.
 
@@ -179,9 +186,22 @@ Supply custom precall logger.
 Code will be called when logging method call. Code will be given a hashref
 argument \%args containing these keys: C<args> (arrayref, the original @_),
 C<orig> (coderef, the original method), C<name> (string, the fully-qualified
-method name).
+method name), C<logger_args> (arguments given when adding logging).
 
 You can use this mechanism to customize logging.
+
+The default logger accepts this arguments (in C<logger_args>):
+
+=over
+
+=item *
+
+indent => INT (default: 0)
+
+
+=back
+
+Indent according to nesting level.
 
 =back
 

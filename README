@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.09
+    version 0.10
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -47,6 +47,12 @@ FUNCTIONS
         The default is to add logging to all non-private methods. Private
         methods are those prefixed by "_".
 
+    *   logger_args => *any*
+
+        Pass arguments to logger.
+
+        This allows passing arguments to logger routine (see "logger_args").
+
     *   postcall_logger => *code*
 
         Supply custom postcall logger.
@@ -55,7 +61,8 @@ FUNCTIONS
         call. Code will be given a hashref argument \%args containing these
         keys: "args" (arrayref, the original @*), "orig" (coderef, the
         original method), "name" (string, the fully-qualified method name),
-        "result" (arrayref, the method result).
+        "result" (arrayref, the method result), "logger_args" (arguments
+        given when adding logging).
 
         You can use this mechanism to customize logging.
 
@@ -66,9 +73,16 @@ FUNCTIONS
         Code will be called when logging method call. Code will be given a
         hashref argument \%args containing these keys: "args" (arrayref, the
         original @_), "orig" (coderef, the original method), "name" (string,
-        the fully-qualified method name).
+        the fully-qualified method name), "logger_args" (arguments given
+        when adding logging).
 
         You can use this mechanism to customize logging.
+
+        The default logger accepts this arguments (in "logger_args"):
+
+        *   indent => INT (default: 0)
+
+        Indent according to nesting level.
 
     Return value:
 
