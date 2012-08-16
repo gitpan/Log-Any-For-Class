@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.11'; # VERSION
+our $VERSION = '0.12'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -106,7 +106,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.11
+version 0.12
 
 =head1 SYNOPSIS
 
@@ -202,6 +202,17 @@ indent => INT (default: 0)
 =back
 
 Indent according to nesting level.
+
+=over
+
+=item *
+
+max_depth => INT (default: -1)
+
+
+=back
+
+Only log to this nesting level. -1 means unlimited.
 
 =back
 
