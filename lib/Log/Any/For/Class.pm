@@ -5,11 +5,11 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.15'; # VERSION
+our $VERSION = '0.16'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
-use Log::Any::For::Package ();
+use Log::Any::For::Package qw(add_logging_to_package);
 
 our %SPEC;
 
@@ -108,7 +108,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.15
+version 0.16
 
 =head1 SYNOPSIS
 
