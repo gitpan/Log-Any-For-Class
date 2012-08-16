@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.12'; # VERSION
+our $VERSION = '0.13'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -106,7 +106,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.12
+version 0.13
 
 =head1 SYNOPSIS
 
@@ -173,9 +173,10 @@ Supply custom postcall logger.
 
 Just like precallI<logger, but code will be called after method is call. Code
 will be given a hashref argument \%args containing these keys: C<args> (arrayref,
-the original @>), C<orig> (coderef, the original method), C<name> (string, the
-fully-qualified method name), C<result> (arrayref, the method result),
-C<logger_args> (arguments given when adding logging).
+a shallow copy of the original @>), C<orig> (coderef, the original method),
+C<name> (string, a shallow copy of the fully-qualified method name), C<result>
+(arrayref, the method result), C<logger_args> (arguments given when adding
+logging).
 
 You can use this mechanism to customize logging.
 
@@ -184,9 +185,10 @@ You can use this mechanism to customize logging.
 Supply custom precall logger.
 
 Code will be called when logging method call. Code will be given a hashref
-argument \%args containing these keys: C<args> (arrayref, the original @_),
-C<orig> (coderef, the original method), C<name> (string, the fully-qualified
-method name), C<logger_args> (arguments given when adding logging).
+argument \%args containing these keys: C<args> (arrayref, a shallow copy of the
+original @_), C<orig> (coderef, the original method), C<name> (string, the
+fully-qualified method name), C<logger_args> (arguments given when adding
+logging).
 
 You can use this mechanism to customize logging.
 

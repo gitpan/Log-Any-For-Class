@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.12
+    version 0.13
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -59,10 +59,10 @@ FUNCTIONS
 
         Just like precall*logger, but code will be called after method is
         call. Code will be given a hashref argument \%args containing these
-        keys: "args" (arrayref, the original @*), "orig" (coderef, the
-        original method), "name" (string, the fully-qualified method name),
-        "result" (arrayref, the method result), "logger_args" (arguments
-        given when adding logging).
+        keys: "args" (arrayref, a shallow copy of the original @*), "orig"
+        (coderef, the original method), "name" (string, a shallow copy of
+        the fully-qualified method name), "result" (arrayref, the method
+        result), "logger_args" (arguments given when adding logging).
 
         You can use this mechanism to customize logging.
 
@@ -71,10 +71,10 @@ FUNCTIONS
         Supply custom precall logger.
 
         Code will be called when logging method call. Code will be given a
-        hashref argument \%args containing these keys: "args" (arrayref, the
-        original @_), "orig" (coderef, the original method), "name" (string,
-        the fully-qualified method name), "logger_args" (arguments given
-        when adding logging).
+        hashref argument \%args containing these keys: "args" (arrayref, a
+        shallow copy of the original @_), "orig" (coderef, the original
+        method), "name" (string, the fully-qualified method name),
+        "logger_args" (arguments given when adding logging).
 
         You can use this mechanism to customize logging.
 
