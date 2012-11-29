@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.17'; # VERSION
+our $VERSION = '0.18'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -85,9 +85,14 @@ sub add_logging_to_class {
     my $filter_methods = $args{filter_methods};
     delete $args{filter_methods};
 
-    $args{precall_logger}  //= \&_default_precall_logger;
-    $args{postcall_logger} //= \&_default_postcall_logger;
-
+    if (!$args{precall_logger}) {
+        $args{precall_logger} = \&_default_precall_logger;
+        $args{logger_args}{precall_wrapper_depth} = 3;
+    }
+    if (!$args{postcall_logger}) {
+        $args{postcall_logger} = \&_default_postcall_logger;
+        $args{logger_args}{postcall_wrapper_depth} = 3;
+    }
     add_logging_to_package(
         %args,
         packages => $classes,
@@ -108,7 +113,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.17
+version 0.18
 
 =head1 SYNOPSIS
 
@@ -168,7 +173,7 @@ those prefixed by C<_>.
 
 Pass arguments to logger.
 
-This allows passing arguments to logger routine (see C<logger_args>).
+This allows passing arguments to logger routine.
 
 =item * B<postcall_logger> => I<code>
 

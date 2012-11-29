@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.17
+    version 0.18
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -53,7 +53,7 @@ FUNCTIONS
 
         Pass arguments to logger.
 
-        This allows passing arguments to logger routine (see "logger_args").
+        This allows passing arguments to logger routine.
 
     *   postcall_logger => *code*
 
