@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.18'; # VERSION
+our $VERSION = '0.19'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -113,7 +113,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.18
+version 0.19
 
 =head1 SYNOPSIS
 
