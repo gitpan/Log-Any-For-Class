@@ -24,6 +24,11 @@
             "Module::Build" : "0.3601"
          }
       },
+      "develop" : {
+         "requires" : {
+            "Test::Rinci" : "0.01"
+         }
+      },
       "runtime" : {
          "requires" : {
             "Data::Clean::JSON" : 0,
@@ -42,6 +47,6 @@
          "url" : "http://github.com/sharyanto/perl-Log-Any-For-Class"
       }
    },
-   "version" : "0.16"
+   "version" : "0.17"
 }
 

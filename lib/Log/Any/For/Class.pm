@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.16'; # VERSION
+our $VERSION = '0.17'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -108,7 +108,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 
@@ -116,9 +116,10 @@ version 0.16
  add_logging_to_class(classes => [qw/My::Class My::SubClass/]);
  # now method calls to your classes are logged, by default at level 'trace'
 
-=head1 CREDITS
+=head1 DESCRIPTION
 
-Some code portion taken from L<Devel::TraceMethods>.
+Most of the things that apply to L<Log::Any::For::Package> also applies to this
+module, since this module uses add_logging_to_package() as its backend.
 
 =head1 SEE ALSO
 
@@ -173,12 +174,12 @@ This allows passing arguments to logger routine (see C<logger_args>).
 
 Supply custom postcall logger.
 
-Just like precallI<logger, but code will be called after method is call. Code
-will be given a hashref argument \%args containing these keys: C<args> (arrayref,
-a shallow copy of the original @>), C<orig> (coderef, the original method),
-C<name> (string, a shallow copy of the fully-qualified method name), C<result>
-(arrayref, the method result), C<logger_args> (arguments given when adding
-logging).
+Just like precallI<logger, but code will be called after subroutine/method is
+called. Code will be given a hashref argument \%args containing these keys:
+C<args> (arrayref, a shallow copy of the original @>), C<orig> (coderef, the
+original subroutine/method), C<name> (string, the fully-qualified
+subroutine/method name), C<result> (arrayref, the subroutine/method result),
+C<logger_args> (arguments given when adding logging).
 
 You can use this mechanism to customize logging.
 
@@ -186,15 +187,15 @@ You can use this mechanism to customize logging.
 
 Supply custom precall logger.
 
-Code will be called when logging method call. Code will be given a hashref
-argument \%args containing these keys: C<args> (arrayref, a shallow copy of the
-original @_), C<orig> (coderef, the original method), C<name> (string, the
-fully-qualified method name), C<logger_args> (arguments given when adding
-logging).
+Code will be called when logging subroutine/method call. Code will be given a
+hashref argument \%args containing these keys: C<args> (arrayref, a shallow copy
+of the original @_), C<orig> (coderef, the original subroutine/method), C<name>
+(string, the fully-qualified subroutine/method name), C<logger_args> (arguments
+given when adding logging).
 
 You can use this mechanism to customize logging.
 
-The default logger accepts this arguments (in C<logger_args>):
+The default logger accepts these arguments (can be supplied via C<logger_args>):
 
 =over
 

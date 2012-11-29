@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.16'; # VERSION
+our $VERSION = '0.17'; # VERSION
 
 use Data::Clean::JSON;
 use Data::Clone;
@@ -30,7 +30,7 @@ sub import {
 }
 
 # XXX copied from SHARYANTO::Package::Util
-sub package_exists {
+sub _package_exists {
     no strict 'refs';
 
     my $pkg = shift;
@@ -51,6 +51,12 @@ sub _default_precall_logger {
     my $args  = shift;
 
     if ($log->is_trace) {
+
+        # there is no equivalent of caller_depth in Log::Any, so we do this only
+        # for Log4perl
+        local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth + 2
+            if $Log::{"Log4perl::"};
+
         my $largs  = $args->{logger_args} // {};
         my $md     = $largs->{max_depth} // $default_max_depth;
         if ($md == -1 || $nest_level < $md) {
@@ -58,6 +64,7 @@ sub _default_precall_logger {
             my $cargs  = $cleanser->clone_and_clean($args->{args});
             $log->tracef("%s---> %s(%s)", $indent, $args->{name}, $cargs);
         }
+
     }
     $nest_level++;
 }
@@ -67,6 +74,12 @@ sub _default_postcall_logger {
 
     $nest_level--;
     if ($log->is_trace) {
+
+        # there is no equivalent of caller_depth in Log::Any, so we do this only
+        # for Log4perl
+        local $Log::Log4perl::caller_depth = $Log::Log4perl::caller_depth + 2
+            if $Log::{"Log4perl::"};
+
         my $largs  = $args->{logger_args} // {};
         my $md     = $largs->{max_depth} // $default_max_depth;
         if ($md == -1 || $nest_level < $md) {
@@ -78,6 +91,7 @@ sub _default_postcall_logger {
                 $log->tracef("%s<--- %s()", $indent, $args->{name});
             }
         }
+
     }
 }
 
@@ -107,15 +121,15 @@ _
             schema  => 'code*',
             description => <<'_',
 
-Code will be called when logging method call. Code will be given a hashref
-argument \%args containing these keys: `args` (arrayref, a shallow copy of the
-original @_), `orig` (coderef, the original method), `name` (string, the
-fully-qualified method name), `logger_args` (arguments given when adding
-logging).
+Code will be called when logging subroutine/method call. Code will be given a
+hashref argument \%args containing these keys: `args` (arrayref, a shallow copy
+of the original @_), `orig` (coderef, the original subroutine/method), `name`
+(string, the fully-qualified subroutine/method name), `logger_args` (arguments
+given when adding logging).
 
 You can use this mechanism to customize logging.
 
-The default logger accepts this arguments (in `logger_args`):
+The default logger accepts these arguments (can be supplied via `logger_args`):
 
 * indent => INT (default: 0)
 
@@ -132,12 +146,12 @@ _
             schema  => 'code*',
             description => <<'_',
 
-Just like precall_logger, but code will be called after method is call. Code
-will be given a hashref argument \%args containing these keys: `args` (arrayref,
-a shallow copy of the original @_), `orig` (coderef, the original method),
-`name` (string, a shallow copy of the fully-qualified method name), `result`
-(arrayref, the method result), `logger_args` (arguments given when adding
-logging).
+Just like precall_logger, but code will be called after subroutine/method is
+called. Code will be given a hashref argument \%args containing these keys:
+`args` (arrayref, a shallow copy of the original @_), `orig` (coderef, the
+original subroutine/method), `name` (string, the fully-qualified
+subroutine/method name), `result` (arrayref, the subroutine/method result),
+`logger_args` (arguments given when adding logging).
 
 You can use this mechanism to customize logging.
 
@@ -154,11 +168,14 @@ _
         },
         filter_subs => {
             summary => 'Filter subroutines to add logging to',
-            schema => ['any*' => {of=>['regex*', 'code*']}],
+            schema => ['any*' => {of=>['re*', 'code*']}],
             description => <<'_',
 
-The default is to add logging to all non-private subroutines. Private
-subroutines are those prefixed by `_`.
+The default is to read from environment LOG_PACKAGE_INCLUDE_SUB_RE and
+LOG_PACKAGE_EXCLUDE_SUB_RE (these should contain regex that will be matched
+against fully-qualified subroutine/method name), or, if those environment are
+undefined, add logging to all non-private subroutines (private subroutines are
+those prefixed by `_`). For example.
 
 _
         },
@@ -172,7 +189,23 @@ sub add_logging_to_package {
     my $packages = $args{packages} or die "Please specify 'packages'";
     $packages = [$packages] unless ref($packages) eq 'ARRAY';
 
-    my $filter = $args{filter_subs} // qr/[^_]/;
+    my $filter = $args{filter_subs};
+    my $envincre = $ENV{LOG_PACKAGE_INCLUDE_SUB_RE};
+    my $envexcre = $ENV{LOG_PACKAGE_EXCLUDE_SUB_RE};
+    if (!defined($filter) && (defined($envincre) || defined($envexcre))) {
+        $filter = sub {
+            local $_ = shift;
+            if (defined $envexcre) {
+                return 0 if /$envexcre/;
+                return 1 unless defined($envincre);
+            }
+            if (defined $envincre) {
+                return 1 if /$envincre/;
+                return 0;
+            }
+        };
+    }
+    $filter //= qr/::[^_]\w+$/;
 
     for my $package (@$packages) {
 
@@ -180,7 +213,7 @@ sub add_logging_to_package {
             unless $package =~ /\A\w+(::\w+)*\z/;
 
         # require module
-        unless (package_exists($package)) {
+        unless (_package_exists($package)) {
             eval "use $package; 1" or die "Can't load $package: $@";
         }
 
@@ -276,7 +309,7 @@ Log::Any::For::Package - Add logging to package
 
 =head1 VERSION
 
-version 0.16
+version 0.17
 
 =head1 SYNOPSIS
 
@@ -301,6 +334,24 @@ version 0.16
 
  use Log::Any::For::Package qw(add_logging_to_package);
  add_logging_to_package(packages => [qw/My::Module My::Other::Module/]);
+
+=head1 FAQ
+
+=head2 My package Foo is not in a separate source file, Log::Any::For::Package tries to require Foo and dies.
+
+Log::Any::For::Package detects whether package Foo already exists, and require()
+the module if it does not. To avoid the require(), simply declare the package
+before use()-ing Log::Any::For::Package, e.g.:
+
+ BEGIN { package Foo; ... }
+ package main;
+ use Log::Any::For::Package qw(Foo);
+
+=head1 ENVIRONMENT
+
+LOG_PACKAGE_INCLUDE_SUB_RE
+
+LOG_PACKAGE_EXCLUDE_SUB_RE
 
 =head1 CREDITS
 
@@ -339,12 +390,15 @@ Arguments ('*' denotes required arguments):
 
 =over 4
 
-=item * B<filter_subs> => I<code|regex>
+=item * B<filter_subs> => I<code|re>
 
 Filter subroutines to add logging to.
 
-The default is to add logging to all non-private subroutines. Private
-subroutines are those prefixed by C<_>.
+The default is to read from environment LOGI<PACKAGE>INCLUDEI<SUB>RE and
+LOGI<PACKAGE>EXCLUDEI<SUB>RE (these should contain regex that will be matched
+against fully-qualified subroutine/method name), or, if those environment are
+undefined, add logging to all non-private subroutines (private subroutines are
+those prefixed by C<_>). For example.
 
 =item * B<logger_args> => I<any>
 
@@ -360,12 +414,12 @@ Packages to add logging to.
 
 Supply custom postcall logger.
 
-Just like precallI<logger, but code will be called after method is call. Code
-will be given a hashref argument \%args containing these keys: C<args> (arrayref,
-a shallow copy of the original @>), C<orig> (coderef, the original method),
-C<name> (string, a shallow copy of the fully-qualified method name), C<result>
-(arrayref, the method result), C<logger_args> (arguments given when adding
-logging).
+Just like precallI<logger, but code will be called after subroutine/method is
+called. Code will be given a hashref argument \%args containing these keys:
+C<args> (arrayref, a shallow copy of the original @>), C<orig> (coderef, the
+original subroutine/method), C<name> (string, the fully-qualified
+subroutine/method name), C<result> (arrayref, the subroutine/method result),
+C<logger_args> (arguments given when adding logging).
 
 You can use this mechanism to customize logging.
 
@@ -373,15 +427,15 @@ You can use this mechanism to customize logging.
 
 Supply custom precall logger.
 
-Code will be called when logging method call. Code will be given a hashref
-argument \%args containing these keys: C<args> (arrayref, a shallow copy of the
-original @_), C<orig> (coderef, the original method), C<name> (string, the
-fully-qualified method name), C<logger_args> (arguments given when adding
-logging).
+Code will be called when logging subroutine/method call. Code will be given a
+hashref argument \%args containing these keys: C<args> (arrayref, a shallow copy
+of the original @_), C<orig> (coderef, the original subroutine/method), C<name>
+(string, the fully-qualified subroutine/method name), C<logger_args> (arguments
+given when adding logging).
 
 You can use this mechanism to customize logging.
 
-The default logger accepts this arguments (in C<logger_args>):
+The default logger accepts these arguments (can be supplied via C<logger_args>):
 
 =over
 
