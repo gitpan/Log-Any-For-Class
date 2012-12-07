@@ -18,9 +18,10 @@ requires:
   Data::Clone: 0
   Log::Any: 0
   Rinci: v1.1.0
+  SHARYANTO::Package::Util: 0
   Sub::Uplevel: 0
   perl: 5.010000
 resources:
   homepage: http://metacpan.org/release/Log-Any-For-Class
   repository: http://github.com/sharyanto/perl-Log-Any-For-Class
-version: 0.19
+version: 0.20

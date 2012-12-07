@@ -35,6 +35,7 @@
             "Data::Clone" : 0,
             "Log::Any" : 0,
             "Rinci" : "v1.1.0",
+            "SHARYANTO::Package::Util" : 0,
             "Sub::Uplevel" : 0,
             "perl" : "5.010000"
          }
@@ -47,6 +48,6 @@
          "url" : "http://github.com/sharyanto/perl-Log-Any-For-Class"
       }
    },
-   "version" : "0.19"
+   "version" : "0.20"
 }
 

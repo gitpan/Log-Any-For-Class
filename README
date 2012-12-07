@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.19
+    version 0.20
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -92,6 +92,17 @@ FUNCTIONS
         *   max_depth => INT (default: -1)
 
         Only log to this nesting level. -1 means unlimited.
+
+        *   log*sub*args => BOOL (default: 1)
+
+        Whether to display subroutine arguments when logging subroutine
+        entry. The default can also be supplied via environment
+        LOG*SUB*ARGS.
+
+        *   log*sub*result => BOOL (default: 1)
+
+        Whether to display subroutine result when logging subroutine exit.
+        The default can also be set via environment LOG*SUB*RESULT.
 
     Return value:
 

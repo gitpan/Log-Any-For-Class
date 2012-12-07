@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.19'; # VERSION
+our $VERSION = '0.20'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -113,7 +113,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.19
+version 0.20
 
 =head1 SYNOPSIS
 
@@ -223,6 +223,30 @@ max_depth => INT (default: -1)
 =back
 
 Only log to this nesting level. -1 means unlimited.
+
+=over
+
+=item *
+
+logI<sub>args => BOOL (default: 1)
+
+
+=back
+
+Whether to display subroutine arguments when logging subroutine entry. The default can also
+be supplied via environment LOGI<SUB>ARGS.
+
+=over
+
+=item *
+
+logI<sub>result => BOOL (default: 1)
+
+
+=back
+
+Whether to display subroutine result when logging subroutine exit. The default
+can also be set via environment LOGI<SUB>RESULT.
 
 =back
 

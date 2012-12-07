@@ -5,15 +5,17 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.19'; # VERSION
+our $VERSION = '0.20'; # VERSION
 
 use Data::Clean::JSON;
 use Data::Clone;
+use SHARYANTO::Package::Util qw(package_exists list_package_contents);
 use Sub::Uplevel;
 
 our %SPEC;
 
 my $cleanser = Data::Clean::JSON->new(-ref => ['stringify']);
+my $import_hook_installed;
 
 sub import {
     my $class = shift;
@@ -26,20 +28,6 @@ sub import {
         } else {
             add_logging_to_package(packages => [$arg]);
         }
-    }
-}
-
-# XXX copied from SHARYANTO::Package::Util
-sub _package_exists {
-    no strict 'refs';
-
-    my $pkg = shift;
-
-    return unless $pkg =~ /\A\w+(::\w+)*\z/;
-    if ($pkg =~ s/::(\w+)\z//) {
-        return !!${$pkg . "::"}{$1 . "::"};
-    } else {
-        return !!$::{$pkg . "::"};
     }
 }
 
@@ -63,7 +51,12 @@ sub _default_precall_logger {
         my $md     = $largs->{max_depth} // $default_max_depth;
         if ($md == -1 || $nest_level < $md) {
             my $indent = " "x($nest_level*($largs->{indent}//$default_indent));
-            my $cargs  = $cleanser->clone_and_clean($args->{args});
+            my $cargs;
+            if ($largs->{log_sub_args} // $ENV{LOG_SUB_ARGS} // 1) {
+                $cargs = $cleanser->clone_and_clean($args->{args});
+            } else {
+                $cargs = "...";
+            }
             $log->tracef("%s---> %s(%s)", $indent, $args->{name}, $cargs);
         }
 
@@ -89,7 +82,12 @@ sub _default_postcall_logger {
         if ($md == -1 || $nest_level < $md) {
             my $indent = " "x($nest_level*($largs->{indent}//$default_indent));
             if (@{$args->{result}}) {
-                my $cres = $cleanser->clone_and_clean($args->{result});
+                my $cres;
+                if ($largs->{log_sub_result} // $ENV{LOG_SUB_RESULT} // 1) {
+                    $cres = $cleanser->clone_and_clean($args->{result});
+                } else {
+                    $cres = "...";
+                }
                 $log->tracef("%s<--- %s() = %s", $indent, $args->{name}, $cres);
             } else {
                 $log->tracef("%s<--- %s()", $indent, $args->{name});
@@ -108,8 +106,8 @@ Logging will be done using Log::Any.
 
 Currently this function adds logging around function calls, e.g.:
 
-    -> Package::func(...)
-    <- Package::func() = RESULT
+    ---> Package::func(ARGS)
+    <--- Package::func() = RESULT
     ...
 
 _
@@ -119,6 +117,21 @@ _
             schema => ['array*' => {of=>'str*'}],
             req => 1,
             pos => 0,
+            description => <<'_',
+
+Each element can be the name of a package or a regex pattern (any non-valid
+package name will be regarded as a regex). Package will be checked for
+existence; if it doesn't already exist then the module will be require()'d.
+
+This module will also install an @INC import hook if you have regex. So if you
+do this:
+
+    % perl -MData::Sah -MLog::Any::For::Package=Data::Sah::.* -e'...'
+
+then if Data::Sah::Compiler, Data::Sah::Lang, etc get loaded, the import hook
+will automatically add logging to it.
+
+_
         },
         precall_logger => {
             summary => 'Supply custom precall logger',
@@ -142,6 +155,16 @@ Indent according to nesting level.
 * max_depth => INT (default: -1)
 
 Only log to this nesting level. -1 means unlimited.
+
+* log_sub_args => BOOL (default: 1)
+
+Whether to display subroutine arguments when logging subroutine entry. The default can also
+be supplied via environment LOG_SUB_ARGS.
+
+* log_sub_result => BOOL (default: 1)
+
+Whether to display subroutine result when logging subroutine exit. The default
+can also be set via environment LOG_SUB_RESULT.
 
 _
         },
@@ -187,7 +210,6 @@ _
     result_naked => 1,
 };
 sub add_logging_to_package {
-
     my %args = @_;
 
     my $packages = $args{packages} or die "Please specify 'packages'";
@@ -211,50 +233,28 @@ sub add_logging_to_package {
     }
     $filter //= qr/::[^_]\w+$/;
 
-    for my $package (@$packages) {
+    my $_add = sub {
+        my ($package) = @_;
+        #$log->tracef("Adding logging to package %s ...", $package);
 
-        die "Invalid package name $package"
-            unless $package =~ /\A\w+(::\w+)*\z/;
+        my %contents = list_package_contents($package);
+        for my $sym (keys %contents) {
+            my $sub = $contents{$sym};
+            next unless ref($sub) eq 'CODE';
 
-        # require module
-        unless (_package_exists($package)) {
-            eval "use $package; 1" or die "Can't load $package: $@";
-        }
-
-        my $src;
-        # get the calling package symbol table name
-        {
-            no strict 'refs';
-            $src = \%{ $package . '::' };
-        }
-
-        # loop through all symbols in calling package, looking for subs
-        for my $symbol (keys %$src) {
-            # get all code references, make sure they're valid
-            my $sub = *{ $src->{$symbol} }{CODE};
-            next unless defined $sub and defined &$sub;
-
-            my $name = "${package}::$symbol";
+            my $name = "${package}::$sym";
             if (ref($filter) eq 'CODE') {
                 next unless $filter->($name);
             } else {
                 next unless $name =~ $filter;
             }
 
-            # save all other slots of the typeglob
-            my @slots;
-
-            for my $slot (qw( SCALAR ARRAY HASH IO FORMAT )) {
-                my $elem = *{ $src->{$symbol} }{$slot};
-                next unless defined $elem;
-                push @slots, $elem;
-            }
-
-            # clear out the source glob
-            undef $src->{$symbol};
+            no strict 'refs';
+            no warnings; # redefine sub
 
             # replace the sub in the source
-            $src->{$symbol} = sub {
+            #$log->tracef("Adding logging to subroutine %s ...", $sym);
+            *{"$package\::$sym"} = sub {
                 my $logger;
                 my %largs = (
                     orig   => $sub,
@@ -289,13 +289,53 @@ sub add_logging_to_package {
                 }
             };
 
-            # replace the other slot elements
-            for my $elem (@slots) {
-                $src->{$symbol} = $elem;
-            }
-        } # for $symbol
+        } # for $sym
+    };
+
+    my $has_re;
+    for my $package (@$packages) {
+        unless ($package =~ /\A\w+(::\w+)*\z/) {
+            $package = qr/$package/;
+            $has_re++;
+            next;
+        }
+
+        # require module
+        unless (package_exists($package)) {
+            eval "use $package; 1" or die "Can't load $package: $@";
+        }
+
+        $_add->($package);
 
     } # for $package
+
+    if ($has_re) {
+        unless ($import_hook_installed++) {
+            unshift @INC, sub {
+                my ($self, $module) = @_;
+
+                # load the module first
+                local @INC = grep { !ref($_) || $_ != $self } @INC;
+                require $module;
+
+                my $package = $module;
+                $package =~ s/\.pm$//;
+                $package =~ s!/!::!g;
+
+                $_add->($package) if $package ~~ @$packages;
+
+                # ignore this hook
+                my $line = 0;
+                return sub {
+                    unless ($line++) {
+                        $_ = "1;\n";
+                        return 1;
+                    }
+                    return 0;
+                }
+            };
+        }
+    }
 
     1;
 }
@@ -313,7 +353,7 @@ Log::Any::For::Package - Add logging to package
 
 =head1 VERSION
 
-version 0.19
+version 0.20
 
 =head1 SYNOPSIS
 
@@ -353,9 +393,13 @@ before use()-ing Log::Any::For::Package, e.g.:
 
 =head1 ENVIRONMENT
 
-LOG_PACKAGE_INCLUDE_SUB_RE
+=head2 LOG_PACKAGE_INCLUDE_SUB_RE (str)
 
-LOG_PACKAGE_EXCLUDE_SUB_RE
+=head2 LOG_PACKAGE_EXCLUDE_SUB_RE (str)
+
+=head2 LOG_SUB_ARGS (bool)
+
+=head2 LOG_SUB_RESULT (bool)
 
 =head1 CREDITS
 
@@ -386,8 +430,8 @@ Logging will be done using Log::Any.
 
 Currently this function adds logging around function calls, e.g.:
 
-    -> Package::func(...)
-    <- Package::func() = RESULT
+    ---> Package::func(ARGS)
+    <--- Package::func() = RESULT
     ...
 
 Arguments ('*' denotes required arguments):
@@ -413,6 +457,18 @@ This allows passing arguments to logger routine.
 =item * B<packages>* => I<array>
 
 Packages to add logging to.
+
+Each element can be the name of a package or a regex pattern (any non-valid
+package name will be regarded as a regex). Package will be checked for
+existence; if it doesn't already exist then the module will be require()'d.
+
+This module will also install an @INC import hook if you have regex. So if you
+do this:
+
+    % perl -MData::Sah -MLog::Any::For::Package=Data::Sah::.* -e'...'
+
+then if Data::Sah::Compiler, Data::Sah::Lang, etc get loaded, the import hook
+will automatically add logging to it.
 
 =item * B<postcall_logger> => I<code>
 
@@ -462,6 +518,30 @@ max_depth => INT (default: -1)
 =back
 
 Only log to this nesting level. -1 means unlimited.
+
+=over
+
+=item *
+
+logI<sub>args => BOOL (default: 1)
+
+
+=back
+
+Whether to display subroutine arguments when logging subroutine entry. The default can also
+be supplied via environment LOGI<SUB>ARGS.
+
+=over
+
+=item *
+
+logI<sub>result => BOOL (default: 1)
+
+
+=back
+
+Whether to display subroutine result when logging subroutine exit. The default
+can also be set via environment LOGI<SUB>RESULT.
 
 =back
 
