@@ -3,9 +3,10 @@ package Log::Any::For::Package;
 use 5.010;
 use strict;
 use warnings;
+use experimental 'smartmatch';
 use Log::Any '$log';
 
-our $VERSION = '0.20'; # VERSION
+our $VERSION = '0.21'; # VERSION
 
 use Data::Clean::JSON;
 use Data::Clone;
@@ -129,7 +130,7 @@ do this:
     % perl -MData::Sah -MLog::Any::For::Package=Data::Sah::.* -e'...'
 
 then if Data::Sah::Compiler, Data::Sah::Lang, etc get loaded, the import hook
-will automatically add logging to it.
+will automatically add logging to them.
 
 _
         },
@@ -159,12 +160,12 @@ Only log to this nesting level. -1 means unlimited.
 * log_sub_args => BOOL (default: 1)
 
 Whether to display subroutine arguments when logging subroutine entry. The default can also
-be supplied via environment LOG_SUB_ARGS.
+be supplied via environment `LOG_SUB_ARGS`.
 
 * log_sub_result => BOOL (default: 1)
 
 Whether to display subroutine result when logging subroutine exit. The default
-can also be set via environment LOG_SUB_RESULT.
+can also be set via environment `LOG_SUB_RESULT`.
 
 _
         },
@@ -173,7 +174,7 @@ _
             schema  => 'code*',
             description => <<'_',
 
-Just like precall_logger, but code will be called after subroutine/method is
+Just like `precall_logger`, but code will be called after subroutine/method is
 called. Code will be given a hashref argument \%args containing these keys:
 `args` (arrayref, a shallow copy of the original @_), `orig` (coderef, the
 original subroutine/method), `name` (string, the fully-qualified
@@ -198,8 +199,8 @@ _
             schema => ['any*' => {of=>['re*', 'code*']}],
             description => <<'_',
 
-The default is to read from environment LOG_PACKAGE_INCLUDE_SUB_RE and
-LOG_PACKAGE_EXCLUDE_SUB_RE (these should contain regex that will be matched
+The default is to read from environment `LOG_PACKAGE_INCLUDE_SUB_RE` and
+`LOG_PACKAGE_EXCLUDE_SUB_RE` (these should contain regex that will be matched
 against fully-qualified subroutine/method name), or, if those environment are
 undefined, add logging to all non-private subroutines (private subroutines are
 those prefixed by `_`). For example.
@@ -235,9 +236,9 @@ sub add_logging_to_package {
 
     my $_add = sub {
         my ($package) = @_;
-        #$log->tracef("Adding logging to package %s ...", $package);
 
         my %contents = list_package_contents($package);
+        my @syms;
         for my $sym (keys %contents) {
             my $sub = $contents{$sym};
             next unless ref($sub) eq 'CODE';
@@ -253,7 +254,7 @@ sub add_logging_to_package {
             no warnings; # redefine sub
 
             # replace the sub in the source
-            #$log->tracef("Adding logging to subroutine %s ...", $sym);
+            push @syms, $sym;
             *{"$package\::$sym"} = sub {
                 my $logger;
                 my %largs = (
@@ -290,6 +291,7 @@ sub add_logging_to_package {
             };
 
         } # for $sym
+        $log->tracef("Added logging to package %s (subs %s)", $package, \@syms);
     };
 
     my $has_re;
@@ -343,9 +345,11 @@ sub add_logging_to_package {
 1;
 # ABSTRACT: Add logging to package
 
-
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -353,7 +357,7 @@ Log::Any::For::Package - Add logging to package
 
 =head1 VERSION
 
-version 0.20
+version 0.21
 
 =head1 SYNOPSIS
 
@@ -379,48 +383,8 @@ version 0.20
  use Log::Any::For::Package qw(add_logging_to_package);
  add_logging_to_package(packages => [qw/My::Module My::Other::Module/]);
 
-=head1 FAQ
-
-=head2 My package Foo is not in a separate source file, Log::Any::For::Package tries to require Foo and dies.
-
-Log::Any::For::Package detects whether package Foo already exists, and require()
-the module if it does not. To avoid the require(), simply declare the package
-before use()-ing Log::Any::For::Package, e.g.:
-
- BEGIN { package Foo; ... }
- package main;
- use Log::Any::For::Package qw(Foo);
-
-=head1 ENVIRONMENT
-
-=head2 LOG_PACKAGE_INCLUDE_SUB_RE (str)
-
-=head2 LOG_PACKAGE_EXCLUDE_SUB_RE (str)
-
-=head2 LOG_SUB_ARGS (bool)
-
-=head2 LOG_SUB_RESULT (bool)
-
-=head1 CREDITS
-
-Some code portion taken from L<Devel::TraceMethods>.
-
-=head1 SEE ALSO
-
-L<Log::Any::For::Class>
-
-For some modules, use the appropriate Log::Any::For::*, for example:
-L<Log::Any::For::DBI>, L<Log::Any::For::LWP>.
-
-=head1 DESCRIPTION
-
-
-This module has L<Rinci> metadata.
-
 =head1 FUNCTIONS
 
-
-None are exported by default, but they are exportable.
 
 =head2 add_logging_to_package(%args) -> any
 
@@ -442,8 +406,8 @@ Arguments ('*' denotes required arguments):
 
 Filter subroutines to add logging to.
 
-The default is to read from environment LOGI<PACKAGE>INCLUDEI<SUB>RE and
-LOGI<PACKAGE>EXCLUDEI<SUB>RE (these should contain regex that will be matched
+The default is to read from environment C<LOG_PACKAGE_INCLUDE_SUB_RE> and
+C<LOG_PACKAGE_EXCLUDE_SUB_RE> (these should contain regex that will be matched
 against fully-qualified subroutine/method name), or, if those environment are
 undefined, add logging to all non-private subroutines (private subroutines are
 those prefixed by C<_>). For example.
@@ -468,15 +432,15 @@ do this:
     % perl -MData::Sah -MLog::Any::For::Package=Data::Sah::.* -e'...'
 
 then if Data::Sah::Compiler, Data::Sah::Lang, etc get loaded, the import hook
-will automatically add logging to it.
+will automatically add logging to them.
 
 =item * B<postcall_logger> => I<code>
 
 Supply custom postcall logger.
 
-Just like precallI<logger, but code will be called after subroutine/method is
+Just like C<precall_logger>, but code will be called after subroutine/method is
 called. Code will be given a hashref argument \%args containing these keys:
-C<args> (arrayref, a shallow copy of the original @>), C<orig> (coderef, the
+C<args> (arrayref, a shallow copy of the original @_), C<orig> (coderef, the
 original subroutine/method), C<name> (string, the fully-qualified
 subroutine/method name), C<result> (arrayref, the subroutine/method result),
 C<logger_args> (arguments given when adding logging).
@@ -529,7 +493,7 @@ logI<sub>args => BOOL (default: 1)
 =back
 
 Whether to display subroutine arguments when logging subroutine entry. The default can also
-be supplied via environment LOGI<SUB>ARGS.
+be supplied via environment C<LOG_SUB_ARGS>.
 
 =over
 
@@ -541,11 +505,73 @@ logI<sub>result => BOOL (default: 1)
 =back
 
 Whether to display subroutine result when logging subroutine exit. The default
-can also be set via environment LOGI<SUB>RESULT.
+can also be set via environment C<LOG_SUB_RESULT>.
 
 =back
 
 Return value:
+
+=head1 FAQ
+
+=head2 My package Foo is not in a separate source file, Log::Any::For::Package tries to require Foo and dies.
+
+Log::Any::For::Package detects whether package Foo already exists, and require()
+the module if it does not. To avoid the require(), simply declare the package
+before use()-ing Log::Any::For::Package, e.g.:
+
+ BEGIN { package Foo; ... }
+ package main;
+ use Log::Any::For::Package qw(Foo);
+
+=head2 How do I know that logging has been added to a package?
+
+Log::Any::For::Package logs a trace statement like this after it added logging
+to a package:
+
+ Added logging to package Foo (subs ["sub1","sub2",...])
+
+If you use L<Log::Any::App> to enable logging, you might not see this log
+message because it is produced during compile-time after C<use Foo>. To see this
+statement, you can do C<require Foo> instead or setup the logging at
+compile-time yourself instead of at the init-phase like what Log::Any::App is
+doing.
+
+=head1 ENVIRONMENT
+
+=head2 LOG_PACKAGE_INCLUDE_SUB_RE (str)
+
+=head2 LOG_PACKAGE_EXCLUDE_SUB_RE (str)
+
+=head2 LOG_SUB_ARGS (bool)
+
+=head2 LOG_SUB_RESULT (bool)
+
+=head1 CREDITS
+
+Some code portion taken from L<Devel::TraceMethods>.
+
+=head1 SEE ALSO
+
+L<Log::Any::For::Class>
+
+For some modules, use the appropriate Log::Any::For::*, for example:
+L<Log::Any::For::DBI>, L<Log::Any::For::LWP>.
+
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Log-Any-For-Class>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/sharyanto/perl-Log-Any-For-Class>.
+
+=head1 BUGS
+
+Please report any bugs or feature requests on the bugtracker website L<https://rt.cpan.org/Public/Dist/Display.html?Name=Log-Any-For-Class>
+
+When submitting a bug or request, please include a test-file or a
+patch to an existing test-file that illustrates the bug or desired
+feature.
 
 =head1 AUTHOR
 
@@ -553,10 +579,9 @@ Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steven Haryanto.
+This software is copyright (c) 2013 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

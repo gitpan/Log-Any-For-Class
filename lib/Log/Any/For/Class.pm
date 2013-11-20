@@ -1,11 +1,11 @@
 package Log::Any::For::Class;
 
-use 5.010;
+use 5.010001;
 use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.20'; # VERSION
+our $VERSION = '0.21'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -103,9 +103,11 @@ sub add_logging_to_class {
 1;
 # ABSTRACT: Add logging to class
 
-
 __END__
+
 =pod
+
+=encoding UTF-8
 
 =head1 NAME
 
@@ -113,7 +115,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.20
+version 0.21
 
 =head1 SYNOPSIS
 
@@ -126,21 +128,8 @@ version 0.20
 Most of the things that apply to L<Log::Any::For::Package> also applies to this
 module, since this module uses add_logging_to_package() as its backend.
 
-=head1 SEE ALSO
-
-L<Log::Any::For::Package>
-
-L<Log::Any::For::DBI>, an application of this module.
-
-=head1 DESCRIPTION
-
-
-This module has L<Rinci> metadata.
-
 =head1 FUNCTIONS
 
-
-None are exported by default, but they are exportable.
 
 =head2 add_logging_to_class(%args) -> any
 
@@ -179,9 +168,9 @@ This allows passing arguments to logger routine.
 
 Supply custom postcall logger.
 
-Just like precallI<logger, but code will be called after subroutine/method is
+Just like C<precall_logger>, but code will be called after subroutine/method is
 called. Code will be given a hashref argument \%args containing these keys:
-C<args> (arrayref, a shallow copy of the original @>), C<orig> (coderef, the
+C<args> (arrayref, a shallow copy of the original @_), C<orig> (coderef, the
 original subroutine/method), C<name> (string, the fully-qualified
 subroutine/method name), C<result> (arrayref, the subroutine/method result),
 C<logger_args> (arguments given when adding logging).
@@ -234,7 +223,7 @@ logI<sub>args => BOOL (default: 1)
 =back
 
 Whether to display subroutine arguments when logging subroutine entry. The default can also
-be supplied via environment LOGI<SUB>ARGS.
+be supplied via environment C<LOG_SUB_ARGS>.
 
 =over
 
@@ -246,11 +235,33 @@ logI<sub>result => BOOL (default: 1)
 =back
 
 Whether to display subroutine result when logging subroutine exit. The default
-can also be set via environment LOGI<SUB>RESULT.
+can also be set via environment C<LOG_SUB_RESULT>.
 
 =back
 
 Return value:
+
+=head1 SEE ALSO
+
+L<Log::Any::For::Package>
+
+L<Log::Any::For::DBI>, an application of this module.
+
+=head1 HOMEPAGE
+
+Please visit the project's homepage at L<https://metacpan.org/release/Log-Any-For-Class>.
+
+=head1 SOURCE
+
+Source repository is at L<https://github.com/sharyanto/perl-Log-Any-For-Class>.
+
+=head1 BUGS
+
+Please report any bugs or feature requests on the bugtracker website L<https://rt.cpan.org/Public/Dist/Display.html?Name=Log-Any-For-Class>
+
+When submitting a bug or request, please include a test-file or a
+patch to an existing test-file that illustrates the bug or desired
+feature.
 
 =head1 AUTHOR
 
@@ -258,10 +269,9 @@ Steven Haryanto <stevenharyanto@gmail.com>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2012 by Steven Haryanto.
+This software is copyright (c) 2013 by Steven Haryanto.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
 
 =cut
-

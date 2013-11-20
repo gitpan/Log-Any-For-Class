@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.20
+    version 0.21
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -14,17 +14,7 @@ DESCRIPTION
     this module, since this module uses add_logging_to_package() as its
     backend.
 
-SEE ALSO
-    Log::Any::For::Package
-
-    Log::Any::For::DBI, an application of this module.
-
-DESCRIPTION
-    This module has Rinci metadata.
-
 FUNCTIONS
-    None are exported by default, but they are exportable.
-
   add_logging_to_class(%args) -> any
     Add logging to class.
 
@@ -59,10 +49,10 @@ FUNCTIONS
 
         Supply custom postcall logger.
 
-        Just like precall*logger, but code will be called after
+        Just like "precall_logger", but code will be called after
         subroutine/method is called. Code will be given a hashref argument
         \%args containing these keys: "args" (arrayref, a shallow copy of
-        the original @*), "orig" (coderef, the original subroutine/method),
+        the original @_), "orig" (coderef, the original subroutine/method),
         "name" (string, the fully-qualified subroutine/method name),
         "result" (arrayref, the subroutine/method result), "logger_args"
         (arguments given when adding logging).
@@ -97,20 +87,40 @@ FUNCTIONS
 
         Whether to display subroutine arguments when logging subroutine
         entry. The default can also be supplied via environment
-        LOG*SUB*ARGS.
+        "LOG_SUB_ARGS".
 
         *   log*sub*result => BOOL (default: 1)
 
         Whether to display subroutine result when logging subroutine exit.
-        The default can also be set via environment LOG*SUB*RESULT.
+        The default can also be set via environment "LOG_SUB_RESULT".
 
     Return value:
+
+SEE ALSO
+    Log::Any::For::Package
+
+    Log::Any::For::DBI, an application of this module.
+
+HOMEPAGE
+    Please visit the project's homepage at
+    <https://metacpan.org/release/Log-Any-For-Class>.
+
+SOURCE
+    Source repository is at
+    <https://github.com/sharyanto/perl-Log-Any-For-Class>.
+
+BUGS
+    Please report any bugs or feature requests on the bugtracker website
+    <https://rt.cpan.org/Public/Dist/Display.html?Name=Log-Any-For-Class>
+
+    When submitting a bug or request, please include a test-file or a patch
+    to an existing test-file that illustrates the bug or desired feature.
 
 AUTHOR
     Steven Haryanto <stevenharyanto@gmail.com>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2012 by Steven Haryanto.
+    This software is copyright (c) 2013 by Steven Haryanto.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.
