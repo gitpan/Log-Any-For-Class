@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.21'; # VERSION
+our $VERSION = '0.22'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -22,7 +22,7 @@ sub import {
             my @c = caller(0);
             *{"$c[0]::$arg"} = \&$arg;
         } else {
-            add_logging_to_class(packages => [$arg]);
+            add_logging_to_class(classes => [$arg]);
         }
     }
 }
@@ -115,7 +115,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.21
+version 0.22
 
 =head1 SYNOPSIS
 

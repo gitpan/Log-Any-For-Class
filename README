@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.21
+    version 0.22
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);

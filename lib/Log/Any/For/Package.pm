@@ -6,7 +6,7 @@ use warnings;
 use experimental 'smartmatch';
 use Log::Any '$log';
 
-our $VERSION = '0.21'; # VERSION
+our $VERSION = '0.22'; # VERSION
 
 use Data::Clean::JSON;
 use Data::Clone;
@@ -291,7 +291,8 @@ sub add_logging_to_package {
             };
 
         } # for $sym
-        $log->tracef("Added logging to package %s (subs %s)", $package, \@syms);
+        $log->tracef("Added logging to package %s (subs %s)",
+                     $package, [sort @syms]);
     };
 
     my $has_re;
@@ -357,7 +358,7 @@ Log::Any::For::Package - Add logging to package
 
 =head1 VERSION
 
-version 0.21
+version 0.22
 
 =head1 SYNOPSIS
 
@@ -535,6 +536,13 @@ message because it is produced during compile-time after C<use Foo>. To see this
 statement, you can do C<require Foo> instead or setup the logging at
 compile-time yourself instead of at the init-phase like what Log::Any::App is
 doing.
+
+=head2 I'm getting error message 'Can't call method "comment_style" on unblessed reference at ...'
+
+If you use Moose/Mouse/Moo, at the moment you might want to exclude C<BUILD>
+and/or other special methods from being logged. For example:
+
+ % LOG_PACKAGE_EXCLUDE_SUB_RE='BUILD' TRACE=1 perl -MLog::Any::App -MLog::Any::For::Package='Foo::.*' ...
 
 =head1 ENVIRONMENT
 

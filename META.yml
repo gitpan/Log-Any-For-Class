@@ -29,7 +29,7 @@ resources:
   bugtracker: https://rt.cpan.org/Public/Dist/Display.html?Name=Log-Any-For-Class
   homepage: https://metacpan.org/release/Log-Any-For-Class
   repository: git://github.com/sharyanto/perl-Log-Any-For-Class.git
-version: 0.21
+version: 0.22
 x_Dist_Zilla:
   perl:
     version: 5.018001
