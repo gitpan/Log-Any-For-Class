@@ -2,7 +2,7 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.22
+    version 0.23
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -38,6 +38,16 @@ FUNCTIONS
 
         The default is to add logging to all non-private methods. Private
         methods are those prefixed by "_".
+
+    *   import_hook => *bool* (default: 0)
+
+        Whether to install import (@INC) hook instead.
+
+        If this setting is true, then instead of installing logging to all
+        existing packages, an @INC import hook will be installed instead so
+        that subsequent modules that are loaded and that match "packages"
+        will be logged. So to log all subsequent loaded modules, you can set
+        "packages" to "['.*']".
 
     *   logger_args => *any*
 
@@ -75,21 +85,21 @@ FUNCTIONS
         The default logger accepts these arguments (can be supplied via
         "logger_args"):
 
-        *   indent => INT (default: 0)
+        *   "indent" => INT (default: 0)
 
         Indent according to nesting level.
 
-        *   max_depth => INT (default: -1)
+        *   "max_depth" => INT (default: -1)
 
         Only log to this nesting level. -1 means unlimited.
 
-        *   log*sub*args => BOOL (default: 1)
+        *   "log_sub_args" => BOOL (default: 1)
 
         Whether to display subroutine arguments when logging subroutine
         entry. The default can also be supplied via environment
         "LOG_SUB_ARGS".
 
-        *   log*sub*result => BOOL (default: 1)
+        *   "log_sub_result" => BOOL (default: 1)
 
         Whether to display subroutine result when logging subroutine exit.
         The default can also be set via environment "LOG_SUB_RESULT".

@@ -5,7 +5,7 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.22'; # VERSION
+our $VERSION = '0.23'; # VERSION
 
 use Data::Clone;
 use Scalar::Util qw(blessed);
@@ -16,13 +16,17 @@ our %SPEC;
 sub import {
     my $class = shift;
 
-    for my $arg (@_) {
-        if ($arg eq 'add_logging_to_class') {
+    my $hook;
+    while (@_) {
+        my $arg = shift;
+        if ($arg eq '-hook') {
+            $hook = shift;
+        } elsif ($arg eq 'add_logging_to_class') {
             no strict 'refs';
             my @c = caller(0);
             *{"$c[0]::$arg"} = \&$arg;
         } else {
-            add_logging_to_class(classes => [$arg]);
+            add_logging_to_class(classes => [$arg], import_hook=>$hook);
         }
     }
 }
@@ -115,7 +119,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.22
+version 0.23
 
 =head1 SYNOPSIS
 
@@ -158,6 +162,15 @@ Filter methods to add logging to.
 The default is to add logging to all non-private methods. Private methods are
 those prefixed by C<_>.
 
+=item * B<import_hook> => I<bool> (default: 0)
+
+Whether to install import (@INC) hook instead.
+
+If this setting is true, then instead of installing logging to all existing
+packages, an @INC import hook will be installed instead so that subsequent
+modules that are loaded and that match C<packages> will be logged. So to log all
+subsequent loaded modules, you can set C<packages> to C<['.*']>.
+
 =item * B<logger_args> => I<any>
 
 Pass arguments to logger.
@@ -195,7 +208,7 @@ The default logger accepts these arguments (can be supplied via C<logger_args>):
 
 =item *
 
-indent => INT (default: 0)
+C<indent> => INT (default: 0)
 
 
 =back
@@ -206,7 +219,7 @@ Indent according to nesting level.
 
 =item *
 
-max_depth => INT (default: -1)
+C<max_depth> => INT (default: -1)
 
 
 =back
@@ -217,7 +230,7 @@ Only log to this nesting level. -1 means unlimited.
 
 =item *
 
-logI<sub>args => BOOL (default: 1)
+C<log_sub_args> => BOOL (default: 1)
 
 
 =back
@@ -229,7 +242,7 @@ be supplied via environment C<LOG_SUB_ARGS>.
 
 =item *
 
-logI<sub>result => BOOL (default: 1)
+C<log_sub_result> => BOOL (default: 1)
 
 
 =back
