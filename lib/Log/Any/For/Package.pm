@@ -1,17 +1,17 @@
 package Log::Any::For::Package;
 
+our $DATE = '2014-12-05'; # DATE
+our $VERSION = '0.24'; # VERSION
+
 use 5.010;
 use strict;
 use warnings;
 use experimental 'smartmatch';
 use Log::Any '$log';
 
-our $VERSION = '0.23'; # VERSION
-
 use Data::Clean::JSON;
-use Data::Clone;
-use SHARYANTO::Package::Util qw(package_exists list_package_contents
-                                list_subpackages);
+use Package::MoreUtil qw(package_exists list_package_contents
+                         list_subpackages);
 use Sub::Uplevel;
 
 our %SPEC;
@@ -307,7 +307,10 @@ sub add_logging_to_package {
     };
 
     if ($hook) {
-        unless ($import_hook_installed++) {
+        if ($import_hook_installed++) {
+            warn "Only the first add_logging_to_package(import_hook=>1, ...) ".
+                "will be in effect";
+        } else {
             unshift @INC, sub {
                 my ($self, $module) = @_;
 
@@ -370,7 +373,7 @@ Log::Any::For::Package - Add logging to package
 
 =head1 VERSION
 
-version 0.23
+This document describes version 0.24 of Log::Any::For::Package (from Perl distribution Log-Any-For-Class), released on 2014-12-05.
 
 =head1 SYNOPSIS
 
@@ -418,9 +421,9 @@ Logging will be done using Log::Any.
 
 Currently this function adds logging around function calls, e.g.:
 
-    ---> Package::func(ARGS)
-    <--- Package::func() = RESULT
-    ...
+ ---> Package::func(ARGS)
+ <--- Package::func() = RESULT
+ ...
 
 Arguments ('*' denotes required arguments):
 
@@ -489,10 +492,7 @@ The default logger accepts these arguments (can be supplied via C<logger_args>):
 
 =over
 
-=item *
-
-C<indent> => INT (default: 0)
-
+=item * C<indent> => INT (default: 0)
 
 =back
 
@@ -500,10 +500,7 @@ Indent according to nesting level.
 
 =over
 
-=item *
-
-C<max_depth> => INT (default: -1)
-
+=item * C<max_depth> => INT (default: -1)
 
 =back
 
@@ -511,10 +508,7 @@ Only log to this nesting level. -1 means unlimited.
 
 =over
 
-=item *
-
-C<log_sub_args> => BOOL (default: 1)
-
+=item * C<log_sub_args> => BOOL (default: 1)
 
 =back
 
@@ -523,10 +517,7 @@ be supplied via environment C<LOG_SUB_ARGS>.
 
 =over
 
-=item *
-
-C<log_sub_result> => BOOL (default: 1)
-
+=item * C<log_sub_result> => BOOL (default: 1)
 
 =back
 
@@ -536,6 +527,8 @@ can also be set via environment C<LOG_SUB_RESULT>.
 =back
 
 Return value:
+
+ (any)
 
 =head1 FAQ
 
@@ -579,7 +572,7 @@ Please visit the project's homepage at L<https://metacpan.org/release/Log-Any-Fo
 
 =head1 SOURCE
 
-Source repository is at L<https://github.com/sharyanto/perl-Log-Any-For-Class>.
+Source repository is at L<https://github.com/perlancar/perl-Log-Any-For-Class>.
 
 =head1 BUGS
 
@@ -591,11 +584,11 @@ feature.
 
 =head1 AUTHOR
 
-Steven Haryanto <stevenharyanto@gmail.com>
+perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Steven Haryanto.
+This software is copyright (c) 2014 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.

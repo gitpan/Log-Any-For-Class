@@ -2,7 +2,8 @@ NAME
     Log::Any::For::Class - Add logging to class
 
 VERSION
-    version 0.23
+    This document describes version 0.24 of Log::Any::For::Class (from Perl
+    distribution Log-Any-For-Class), released on 2014-12-05.
 
 SYNOPSIS
      use Log::Any::For::Class qw(add_logging_to_class);
@@ -22,9 +23,9 @@ FUNCTIONS
 
     Currently this function adds logging around method calls, e.g.:
 
-        -> Class::method(...)
-        <- Class::method() = RESULT
-        ...
+     -> Class::method(...)
+     <- Class::method() = RESULT
+     ...
 
     Arguments ('*' denotes required arguments):
 
@@ -106,6 +107,8 @@ FUNCTIONS
 
     Return value:
 
+     (any)
+
 SEE ALSO
     Log::Any::For::Package
 
@@ -117,7 +120,7 @@ HOMEPAGE
 
 SOURCE
     Source repository is at
-    <https://github.com/sharyanto/perl-Log-Any-For-Class>.
+    <https://github.com/perlancar/perl-Log-Any-For-Class>.
 
 BUGS
     Please report any bugs or feature requests on the bugtracker website
@@ -127,10 +130,10 @@ BUGS
     to an existing test-file that illustrates the bug or desired feature.
 
 AUTHOR
-    Steven Haryanto <stevenharyanto@gmail.com>
+    perlancar <perlancar@cpan.org>
 
 COPYRIGHT AND LICENSE
-    This software is copyright (c) 2013 by Steven Haryanto.
+    This software is copyright (c) 2014 by perlancar@cpan.org.
 
     This is free software; you can redistribute it and/or modify it under
     the same terms as the Perl 5 programming language system itself.

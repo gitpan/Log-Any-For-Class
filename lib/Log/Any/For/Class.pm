@@ -5,11 +5,12 @@ use strict;
 use warnings;
 use Log::Any '$log';
 
-our $VERSION = '0.23'; # VERSION
+our $DATE = '2014-12-05'; # DATE
+our $VERSION = '0.24'; # VERSION
 
-use Data::Clone;
 use Scalar::Util qw(blessed);
 use Log::Any::For::Package qw(add_logging_to_package);
+use Perinci::Sub::Util qw(gen_modified_sub);
 
 our %SPEC;
 
@@ -47,9 +48,11 @@ sub _default_postcall_logger {
     Log::Any::For::Package::_default_postcall_logger($args);
 }
 
-my $spec = clone $Log::Any::For::Package::SPEC{add_logging_to_package};
-$spec->{summary} = 'Add logging to class';
-$spec->{description} = <<'_';
+gen_modified_sub(
+    output_name => 'add_logging_to_class',
+    base_name => 'Log::Any::For::Package::add_logging_to_package',
+    summary => 'Add logging to class',
+    description => <<'_',
 
 Logging will be done using Log::Any.
 
@@ -60,49 +63,50 @@ Currently this function adds logging around method calls, e.g.:
     ...
 
 _
-delete $spec->{args}{packages};
-$spec->{args}{classes} = {
-    summary => 'Classes to add logging to',
-    schema => ['array*' => {of=>'str*'}],
-    req => 1,
-    pos => 0,
-};
-delete $spec->{args}{filter_subs};
-$spec->{args}{filter_methods} = {
-    summary => 'Filter methods to add logging to',
-    schema => ['array*' => {of=>'str*'}],
-    description => <<'_',
+    remove_args => ['packages', 'filter_subs'],
+    add_args    => {
+        classes => {
+            summary => 'Classes to add logging to',
+            schema => ['array*' => {of=>'str*'}],
+            req => 1,
+            pos => 0,
+        },
+        filter_methods => {
+            summary => 'Filter methods to add logging to',
+            schema => ['array*' => {of=>'str*'}],
+            description => <<'_',
 
 The default is to add logging to all non-private methods. Private methods are
 those prefixed by `_`.
 
 _
-};
-$SPEC{add_logging_to_class} = $spec;
-sub add_logging_to_class {
-    my %args = @_;
+        },
+    },
+    output_code => sub {
+        my %args = @_;
 
-    my $classes = $args{classes} or die "Please specify 'classes'";
-    $classes = [$classes] unless ref($classes) eq 'ARRAY';
-    delete $args{classes};
+        my $classes = $args{classes} or die "Please specify 'classes'";
+        $classes = [$classes] unless ref($classes) eq 'ARRAY';
+        delete $args{classes};
 
-    my $filter_methods = $args{filter_methods};
-    delete $args{filter_methods};
+        my $filter_methods = $args{filter_methods};
+        delete $args{filter_methods};
 
-    if (!$args{precall_logger}) {
-        $args{precall_logger} = \&_default_precall_logger;
-        $args{logger_args}{precall_wrapper_depth} = 3;
-    }
-    if (!$args{postcall_logger}) {
-        $args{postcall_logger} = \&_default_postcall_logger;
-        $args{logger_args}{postcall_wrapper_depth} = 3;
-    }
-    add_logging_to_package(
-        %args,
-        packages => $classes,
-        filter_subs => $filter_methods,
-    );
-}
+        if (!$args{precall_logger}) {
+            $args{precall_logger} = \&_default_precall_logger;
+            $args{logger_args}{precall_wrapper_depth} = 3;
+        }
+        if (!$args{postcall_logger}) {
+            $args{postcall_logger} = \&_default_postcall_logger;
+            $args{logger_args}{postcall_wrapper_depth} = 3;
+        }
+        add_logging_to_package(
+            %args,
+            packages => $classes,
+            filter_subs => $filter_methods,
+        );
+    },
+);
 
 1;
 # ABSTRACT: Add logging to class
@@ -119,7 +123,7 @@ Log::Any::For::Class - Add logging to class
 
 =head1 VERSION
 
-version 0.23
+This document describes version 0.24 of Log::Any::For::Class (from Perl distribution Log-Any-For-Class), released on 2014-12-05.
 
 =head1 SYNOPSIS
 
@@ -143,9 +147,9 @@ Logging will be done using Log::Any.
 
 Currently this function adds logging around method calls, e.g.:
 
-    -> Class::method(...)
-    <- Class::method() = RESULT
-    ...
+ -> Class::method(...)
+ <- Class::method() = RESULT
+ ...
 
 Arguments ('*' denotes required arguments):
 
@@ -206,10 +210,7 @@ The default logger accepts these arguments (can be supplied via C<logger_args>):
 
 =over
 
-=item *
-
-C<indent> => INT (default: 0)
-
+=item * C<indent> => INT (default: 0)
 
 =back
 
@@ -217,10 +218,7 @@ Indent according to nesting level.
 
 =over
 
-=item *
-
-C<max_depth> => INT (default: -1)
-
+=item * C<max_depth> => INT (default: -1)
 
 =back
 
@@ -228,10 +226,7 @@ Only log to this nesting level. -1 means unlimited.
 
 =over
 
-=item *
-
-C<log_sub_args> => BOOL (default: 1)
-
+=item * C<log_sub_args> => BOOL (default: 1)
 
 =back
 
@@ -240,10 +235,7 @@ be supplied via environment C<LOG_SUB_ARGS>.
 
 =over
 
-=item *
-
-C<log_sub_result> => BOOL (default: 1)
-
+=item * C<log_sub_result> => BOOL (default: 1)
 
 =back
 
@@ -253,6 +245,8 @@ can also be set via environment C<LOG_SUB_RESULT>.
 =back
 
 Return value:
+
+ (any)
 
 =head1 SEE ALSO
 
@@ -266,7 +260,7 @@ Please visit the project's homepage at L<https://metacpan.org/release/Log-Any-Fo
 
 =head1 SOURCE
 
-Source repository is at L<https://github.com/sharyanto/perl-Log-Any-For-Class>.
+Source repository is at L<https://github.com/perlancar/perl-Log-Any-For-Class>.
 
 =head1 BUGS
 
@@ -278,11 +272,11 @@ feature.
 
 =head1 AUTHOR
 
-Steven Haryanto <stevenharyanto@gmail.com>
+perlancar <perlancar@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2013 by Steven Haryanto.
+This software is copyright (c) 2014 by perlancar@cpan.org.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
